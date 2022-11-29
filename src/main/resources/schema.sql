@@ -1,0 +1,10 @@
+CREATE TABLE product
+(
+    product_id   binary(16) primary key,
+    product_name varchar(20) not null,
+    category     varchar(20) not null,
+    price        bigint      not null,
+    description  varchar(500) default null,
+    created_at   datetime(6) not null,
+    updated_at   datetime(6) default null
+)

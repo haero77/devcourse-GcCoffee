@@ -1,7 +1,6 @@
 package devcourse.coffee.model;
 
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -11,11 +10,11 @@ public class Product {
 
     private final UUID productId;
     private final LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
     private Category category;
     private String productName;
     private long price;
     private String description;
+    private LocalDateTime updatedAt;
 
     public Product(UUID productId, Category category, String productName, long price) {
         this.productId = productId;
@@ -26,16 +25,15 @@ public class Product {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public Product(UUID productId, LocalDateTime createdAt, LocalDateTime updatedAt, Category category,
-                   String productName, long price, String description
-    ) {
+    public Product(UUID productId, LocalDateTime createdAt, Category category, String productName,
+                   long price, String description, LocalDateTime updatedAt) {
         this.productId = productId;
         this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
         this.category = category;
         this.productName = productName;
         this.price = price;
         this.description = description;
+        this.updatedAt = updatedAt;
     }
 
     public void setCategory(Category category) {
