@@ -2,6 +2,7 @@ package devcourse.coffee.repository;
 
 import devcourse.coffee.model.Category;
 import devcourse.coffee.model.Product;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -35,11 +36,6 @@ public class ProductJdbcRepository implements ProductRepository {
     }
 
     @Override
-    public Product update(Product product) {
-        return null;
-    }
-
-    @Override
     public List<Product> findAll() {
         String sql = "select * from product";
         return jdbcTemplate.query(sql, productRowMapper());
@@ -47,22 +43,55 @@ public class ProductJdbcRepository implements ProductRepository {
 
     @Override
     public Optional<Product> findById(UUID productId) {
-        return Optional.empty();
+        String sql = "select * from product where product_id = UUID_TO_BIN(:productId)";
+
+        try {
+            Map<String, byte[]> paramMap = Collections.singletonMap("productId", productId.toString().getBytes());
+            Product product = jdbcTemplate.queryForObject(sql, paramMap, productRowMapper());
+            return Optional.of(Objects.requireNonNull(product));
+        } catch (EmptyResultDataAccessException emptyResultDataAccessException) {
+            return Optional.empty();
+        }
     }
 
     @Override
-    public Optional<Product> findById(String productName) {
-        return Optional.empty();
+    public Optional<Product> findByName(String productName) {
+        String sql = "select * from product where product_name = :productName";
+
+        try {
+            Map<String, String> paramMap = Collections.singletonMap("productName", productName);
+            Product product = jdbcTemplate.queryForObject(sql, paramMap, productRowMapper());
+            return Optional.of(Objects.requireNonNull(product));
+        } catch (EmptyResultDataAccessException emptyResultDataAccessException) {
+            return Optional.empty();
+        }
     }
 
     @Override
-    public Optional<Product> findByCategory(Category category) {
-        return Optional.empty();
+    public List<Product> findByCategory(Category category) {
+        return jdbcTemplate.query(
+                "select * from product where category = :category",
+                Collections.singletonMap("category", category.toString()),
+                productRowMapper()
+        );
+    }
+
+    @Override
+    public Product update(Product product) {
+        String sql = "update product set product_id=UUID_TO_BIN(:productId), product_name=:productName, category=:category, " +
+                "price=:price, description=:description, created_at=:createdAt, updated_at=:updatedAt";
+        int update = jdbcTemplate.update(sql, toParmaMap(product));
+
+        if (update != 1) {
+            throw new RuntimeException("Nothing was updated");
+        }
+
+        return product;
     }
 
     @Override
     public void deleteAll() {
-
+        jdbcTemplate.update("delete from product", Collections.emptyMap());
     }
 
     private RowMapper<Product> productRowMapper() {
